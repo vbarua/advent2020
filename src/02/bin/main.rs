@@ -26,9 +26,20 @@ fn to_entry(s: &str) -> Entry {
   panic!("Failed to parse");
 }
 
-fn is_valid(e: &Entry) -> bool {
+fn is_valid_p1(e: &Entry) -> bool {
   let usages = e.password.chars().filter(|c| *c == e.character).count();
   (e.from as usize) <= usages && usages <= (e.to as usize)
+}
+
+fn is_valid_p2(e: &Entry) -> bool {
+  let x = e.password.chars().nth((e.from - 1) as usize).map(|c| c == e.character);
+  let y= e.password.chars().nth((e.to - 1) as usize).map(|c| c == e.character);
+  match (x, y) {
+    (None, None) => false,
+    (Some(b), None) => b,
+    (None, Some(b)) => b,
+    (Some(b1), Some(b2)) => (b1 || b2) && !(b1 && b2)
+  }
 }
 
 fn main() -> std::io::Result<()> {
@@ -36,10 +47,10 @@ fn main() -> std::io::Result<()> {
   let mut buf_reader = BufReader::new(file);
   let mut contents = String::new();
   buf_reader.read_to_string(&mut contents)?;
-  let entries  = contents.lines().map(|l| to_entry(l));
+  let entries: Vec<Entry> = contents.lines().map(|l| to_entry(l)).collect();
 
-  println!("Valid Passwords: {}", entries.filter(|e| is_valid(e)).count());
-
+  println!("Valid Passwords P1: {}", entries.iter().filter(|e| is_valid_p1(e)).count());
+  println!("Valid Passwords P2: {}", entries.iter().filter(|e| is_valid_p2(e)).count());
 
   Ok(())
 }
@@ -62,14 +73,14 @@ mod tests {
   }
 
   #[test]
-  fn valid_password() {
-    assert!(is_valid(&to_entry("1-3 a: abcde")));
-    assert!(is_valid(&to_entry("2-9 c: ccccccccc")));
+  fn valid_passwords_p1() {
+    assert!(is_valid_p1(&to_entry("1-3 a: abcde")));
+    assert!(is_valid_p1(&to_entry("2-9 c: ccccccccc")));
   }
 
   #[test]
-  fn invalid_password() {
+  fn invalid_passwords_p1() {
     let e = to_entry("1-3 b: cdefg");
-    assert!(!is_valid(&e))
+    assert!(!is_valid_p1(&e))
   }
 }
