@@ -10,4 +10,8 @@ edition = "2018"
 name = "01"
 path = "src/01/bin/main.rs"
 
-[dependencies]
+[[bin]]
+name = "02"
+path = "src/02/bin/main.rs"
+
+
