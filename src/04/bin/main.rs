@@ -15,6 +15,44 @@ struct Passport {
   cid: bool
 }
 
+fn validate_byr(s: &String) -> bool {
+  s.parse::<i32>().map(|v| 1920 <= v && v <= 2002).unwrap()
+}
+
+fn validate_iyr(s: &String) -> bool {
+  s.parse::<i32>().map(|v| 2010 <= v && v <= 2020).unwrap()
+}
+
+fn validate_eyr(s: &String) -> bool {
+  s.parse::<i32>().map(|v| 2020 <= v && v <= 2030).unwrap()
+}
+
+fn validate_hgt(s: &String) -> bool {
+  let height = s.chars().take_while(|c| c.is_digit(10)).collect::<String>().parse::<i32>().unwrap();
+  if s.ends_with("cm") {
+    150 <= height && height <= 193
+  } else if s.ends_with("in") {
+    59 <= height && height <= 76
+  } else {
+    false
+  }
+}
+
+fn validate_hcl(s: &String) -> bool {
+  s.starts_with("#") && s.chars().skip(1).all(|c| c.is_digit(16)) && s.len() == 7
+}
+
+fn validate_ecl(s: &String) -> bool {
+  for color in &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"] {
+    if s == *color { return true }
+  }
+  false
+}
+
+fn validate_pid(s: &String) -> bool {
+  s.chars().all(|c| c.is_digit(10)) && s.len() == 9
+}
+
 fn to_passport(input_chunk: &str) -> Passport {
   let raw_passport = input_chunk.replace("\n", " ");
   let fields: HashMap<_, _> =
@@ -25,13 +63,13 @@ fn to_passport(input_chunk: &str) -> Passport {
     }).collect();
 
   Passport {
-    byr: fields.get("byr").is_some(),
-    iyr: fields.get("iyr").is_some(),
-    eyr: fields.get("eyr").is_some(),
-    hgt: fields.get("hgt").is_some(),
-    hcl: fields.get("hcl").is_some(),
-    ecl: fields.get("ecl").is_some(),
-    pid: fields.get("pid").is_some(),
+    byr: fields.get("byr").map(validate_byr).unwrap_or(false),
+    iyr: fields.get("iyr").map(validate_iyr).unwrap_or(false),
+    eyr: fields.get("eyr").map(validate_eyr).unwrap_or(false),
+    hgt: fields.get("hgt").map(validate_hgt).unwrap_or(false),
+    hcl: fields.get("hcl").map(validate_hcl).unwrap_or(false),
+    ecl: fields.get("ecl").map(validate_ecl).unwrap_or(false),
+    pid: fields.get("pid").map(validate_pid).unwrap_or(false),
     cid: fields.get("cid").is_some()
   }
 }
