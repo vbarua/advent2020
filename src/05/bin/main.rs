@@ -58,8 +58,23 @@ fn main() -> std::io::Result<()> {
     println!("{} - {} | {}", row, col, id);
     max_id = max(max_id, id)
   }
-  println!();
+  println!("\nPart One");
   println!("Max Id: {}", max_id);
+  println!();
+  let mut seat_ids = contents.lines().map(find_seat).map(|(_, _, id)| id).collect::<Vec<_>>();
+  seat_ids.sort();
+
+  let diffs = seat_ids.iter().skip(1)
+    .zip(seat_ids.iter())
+    .map(|(next_seat_id, seat_id)| (*seat_id, *next_seat_id - *seat_id))
+    .collect::<Vec<_>>();
+
+  for (id, d) in diffs {
+    if d != 1 {
+      println!("Part Two\nSeat Id: {}", id + 1);
+    }
+  }
+
 
   Ok(())
 }
