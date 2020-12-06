@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::collections::HashSet;
 use std::io::BufReader;
+use std::iter::FromIterator;
 
 use std::io::prelude::*;
 
@@ -21,6 +22,17 @@ fn main() -> std::io::Result<()> {
   }).sum();
 
   println!("Part 1: {}", p1);
+
+  let p2: usize = contents.split_terminator("\n\n").map(|chunk| {
+    let mut responses: HashSet<char> = HashSet::from_iter("abcdefghijklmnopqrstuvwxyz".chars());
+    for l in chunk.lines() {
+      let temp: HashSet<char> = HashSet::from_iter(l.chars());
+      responses = responses.intersection(&temp).cloned().collect();
+    }
+    responses.len()
+  }).sum();
+
+  println!("Part 2: {}", p2);
 
   Ok(())
 }
