@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::BufReader;
 
@@ -55,7 +55,7 @@ fn parse_line(l: &str) -> Bag {
     }
 }
 
-fn shinygold_parents(bags: Vec<Bag>) -> usize {
+fn shinygold_parents(bags: &Vec<Bag>) -> usize {
     let mut visited: HashSet<String> = HashSet::new();
     let mut search_for: Vec<String> = Vec::new();
     search_for.push(String::from("shinygold"));
@@ -64,17 +64,36 @@ fn shinygold_parents(bags: Vec<Bag>) -> usize {
             continue;
         }
         visited.insert(search_color.clone());
-        for bag in &bags {
+        for bag in bags {
             for sub_bag in &bag.contents {
                 if sub_bag.color == search_color {
                     search_for.push(bag.color.clone());
                 }
             }
         }
-
-        println!("Current: {}\nNext {:?}\n", search_color, search_for);
     }
-    visited.len()
+    visited.len() - 1
+}
+
+fn shinygold_contents(bags: &Vec<Bag>) -> i32 {
+    let bag_map: HashMap<String, &Bag> =
+        bags.iter().map(|item| (item.color.clone(), item)).collect();
+
+    let mut include: Vec<&Bag> = Vec::new();
+    include.push(bag_map["shinygold"]);
+
+    let mut number_bags = 0;
+    while let Some(bag) = include.pop() {
+        number_bags += 1;
+        for bag_content in &bag.contents {
+            let b: &Bag = bag_map[&bag_content.color];
+            for _ in 0..bag_content.number {
+                include.push(b);
+            }
+        }
+    }
+
+    number_bags - 1
 }
 
 fn main() -> std::io::Result<()> {
@@ -85,7 +104,9 @@ fn main() -> std::io::Result<()> {
 
     let bags: Vec<Bag> = contents.lines().map(|l| parse_line(l)).collect();
 
-    println!("Potential shinygold parents: {}", shinygold_parents(bags));
+    println!("Potential shinygold parents: {}", shinygold_parents(&bags));
+    println!();
+    println!("shinygold contents count: {}", shinygold_contents(&bags));
 
     Ok(())
 }
