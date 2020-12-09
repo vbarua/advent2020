@@ -23,6 +23,24 @@ fn find_weakness(preamble_len: usize, input: &Vec<i64>) -> i64 {
     panic!();
 }
 
+fn find_contiguous(target: i64, input: &Vec<i64>) -> Vec<i64> {
+    for (index, n) in input.iter().enumerate() {
+        let mut sum = *n;
+        let mut range = vec![*n];
+        for m in input.iter().skip(index + 1) {
+            sum += m;
+            range.push(*m);
+            if sum > target {
+                break;
+            }
+            if sum == target {
+                return range;
+            }
+        }
+    }
+    panic!()
+}
+
 fn main() -> std::io::Result<()> {
     let file = File::open("src/09/bin/input.txt")?;
     let mut buf_reader = BufReader::new(file);
@@ -33,6 +51,15 @@ fn main() -> std::io::Result<()> {
 
     let weakness = find_weakness(25, &input);
     println!("Part 1: {}", weakness);
+
+    let range = find_contiguous(weakness, &input);
+    let min = range.iter().min().unwrap();
+    let max = range.iter().max().unwrap();
+
+    println!();
+    println!("Part 2");
+    println!("Range: {:?}", range);
+    println!("{} + {} = {}", *min, *max, *min + *max);
 
     Ok(())
 }
